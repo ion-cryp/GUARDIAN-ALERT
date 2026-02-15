@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GuardianAlert - Clinic Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/clinic-dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="sidebar" id="sidebar">
+      <div class="logo-section">
+        <i class="fas fa-hospital logo-icon"></i>
+        <h1 class="logo-text">Clinic <span>Alert</span></h1>
+        <p class="tagline">Manage student health records and emergency notifications.</p>
+      </div>
+
+      <div class="sidebar-menu">
+        <div class="menu-section">
+          <h4><i class="fas fa-clinic-medical"></i> Clinic Actions</h4>
+          <button class="menu-btn" onclick="openPatientModal()">
+            <i class="fas fa-user-plus"></i> New Patient
+          </button>
+          <button class="menu-btn" onclick="viewAllPatients()">
+            <i class="fas fa-users"></i> All Patients
+          </button>
+          <button class="menu-btn" onclick="viewEmergencyContacts()">
+            <i class="fas fa-exclamation-triangle"></i> Emergency Contacts
+          </button>
+          <button class="menu-btn" onclick="viewMedicalHistory()">
+            <i class="fas fa-file-medical"></i> Medical Records
+          </button>
+          <button class="menu-btn" onclick="viewAlertHistory()">
+            <i class="fas fa-bell"></i> Alert History
+            <span id="alert-history-count" style="margin-left: auto; background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">0</span>
+          </button>
+        </div>
+
+        <div class="menu-section">
+          <h4><i class="fas fa-cog"></i> Settings</h4>
+          <button class="menu-btn" onclick="manageSupplies()">
+            <i class="fas fa-first-aid"></i> Manage Supplies
+          </button>
+          <button class="menu-btn" onclick="clinicLogout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <header class="dashboard-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-student" placeholder="Search students by name or LRN...">
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="date-time">
+            <i class="far fa-clock"></i>
+            <span id="current-time">--:-- --</span>
+            <span id="current-date">--/--/----</span>
+          </div>
+          <div class="theme-toggle">
+            <label class="switch">
+              <input type="checkbox" id="dark-mode-toggle">
+              <span class="slider round">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+              </span>
+            </label>
+          </div>
+        </div>
+      </header>
+
+      <div class="clinic-grid">
+        <div class="dashboard-card stats-card scrollable-card">
+          <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="fas fa-chart-line"></i>
+            <h3>Today's Statistics</h3>
+          </div>
+          <div class="card-body">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <i class="fas fa-user-injured stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Active Cases</span>
+                  <span class="stat-value" id="active-cases">3</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-ambulance stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Emergencies</span>
+                  <span class="stat-value" id="emergencies-today">1</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-users stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Total Students</span>
+                  <span class="stat-value" id="total-students">156</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-bell stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Alerts Sent</span>
+                  <span class="stat-value" id="alerts-sent">5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card recent-patients-card scrollable-card">
+          <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+            <i class="fas fa-clock"></i>
+            <h3>Recent Patients</h3>
+          </div>
+          <div class="card-body">
+            <div id="recent-patients-list"></div>
+            <button class="btn-secondary" onclick="viewAllPatients()" style="margin-top: 20px; width: 100%;">
+              <i class="fas fa-list"></i> View All Patients
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-card alert-card scrollable-card">
+          <div class="card-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Quick Alert</h3>
+          </div>
+          <div class="card-body">
+            <div class="input-group">
+              <i class="fas fa-user-graduate"></i>
+              <select id="alert-student-select" class="qr-select">
+                <option value="">Select Student</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <i class="fas fa-exclamation-circle"></i>
+              <select id="alert-type-select" class="qr-select">
+                <option value="">Select Alert Type</option>
+                <option value="injury">Injury</option>
+                <option value="illness">Illness</option>
+                <option value="fever">Fever</option>
+                <option value="emergency">Emergency</option>
+                <option value="pickup">Parent Pickup Needed</option>
+              </select>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark);">
+                <i class="fas fa-broadcast-tower"></i> Send via:
+              </label>
+              <div style="display: flex; gap: 10px; background: var(--gray-light); padding: 5px; border-radius: 50px;">
+                <button type="button" class="comm-toggle active" data-method="sms" style="flex: 1; padding: 10px; border: none; border-radius: 50px; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;" onclick="setCommunicationMethod('sms')">
+                  <i class="fas fa-sms"></i> SMS
+                </button>
+                <button type="button" class="comm-toggle" data-method="email" style="flex: 1; padding: 10px; border: none; border-radius: 50px; background: transparent; color: var(--dark); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;" onclick="setCommunicationMethod('email')">
+                  <i class="fas fa-envelope"></i> Gmail
+                </button>
+                <button type="button" class="comm-toggle" data-method="call" style="flex: 1; padding: 10px; border: none; border-radius: 50px; background: transparent; color: var(--dark); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;" onclick="setCommunicationMethod('call')">
+                  <i class="fas fa-phone-alt"></i> Call
+                </button>
+              </div>
+            </div>
+            
+            <textarea id="clinic-message" class="message-textarea" 
+              placeholder="Enter details about the student's condition..." rows="4"></textarea>
+            
+            <div class="message-controls">
+              <div class="char-count">
+                <span id="clinic-char-count">0</span> characters
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+              <button class="btn-primary" onclick="sendClinicAlert()" style="flex: 2; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                <i class="fas fa-paper-plane"></i> Send Alert
+              </button>
+              <button class="btn-secondary" onclick="sendClinicAlertToGuardian()" style="flex: 1;" title="Send message to guardian/parent">
+                <i class="fas fa-user-shield"></i> Guardian
+              </button>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 12px; background: rgba(79, 70, 229, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-bell" style="color: var(--primary);"></i>
+                <span style="font-size: 0.85rem; color: var(--dark);" id="alert-method-info">
+                  Alert will be sent via <strong>SMS</strong> to the student's parent/guardian
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card supplies-card scrollable-card">
+          <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <i class="fas fa-first-aid"></i>
+            <h3>Medical Supplies</h3>
+          </div>
+          <div class="card-body">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <i class="fas fa-pills stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Bandages</span>
+                  <span class="stat-value" id="bandages-count">50</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-temperature-high stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Thermometers</span>
+                  <span class="stat-value" id="thermometers-count">5</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-syringe stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">First Aid Kits</span>
+                  <span class="stat-value" id="kits-count">10</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-prescription-bottle stat-icon"></i>
+                <div class="stat-content">
+                  <span class="stat-label">Medications</span>
+                  <span class="stat-value" id="meds-count">25</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn-secondary" onclick="manageSupplies()" style="margin-top: 20px; width: 100%;">
+              <i class="fas fa-edit"></i> Manage Supplies
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal" id="patient-modal">
+    <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> New Patient Record</h3>
+        <button class="modal-close" onclick="closePatientModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <i class="fas fa-search"></i>
+          <input type="text" id="find-student" placeholder="Search student by name or LRN...">
+        </div>
+        
+        <div id="student-search-results" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+        
+        <div id="patient-form" style="display: none;">
+          <div class="form-section-title" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary);">
+            <i class="fas fa-file-medical"></i> Medical Details
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-stethoscope"></i>
+            <select id="condition-type" class="qr-select">
+              <option value="">Select Condition</option>
+              <option value="fever">Fever</option>
+              <option value="headache">Headache</option>
+              <option value="stomach_pain">Stomach Pain</option>
+              <option value="injury">Injury</option>
+              <option value="allergy">Allergy</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-notes-medical"></i>
+            <textarea id="condition-details" class="message-textarea" 
+              placeholder="Enter condition details, symptoms, and treatment..." rows="4"></textarea>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-user-md"></i>
+            <select id="action-needed" class="qr-select">
+              <option value="">Select Action</option>
+              <option value="monitor">Monitor in Clinic</option>
+              <option value="send_home">Send Home</option>
+              <option value="parent_pickup">Parent Pickup Needed</option>
+              <option value="emergency">Emergency - Call Parent</option>
+              <option value="hospital">Refer to Hospital</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-clock"></i>
+            <input type="time" id="visit-time" class="qr-select">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closePatientModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn-primary" onclick="savePatientRecord()" id="save-patient-btn" disabled>
+          <i class="fas fa-save"></i> Save Record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/clinic-dashboard.js"></script>
+</body>
+</html>

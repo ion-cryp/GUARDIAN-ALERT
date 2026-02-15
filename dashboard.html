@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GuardianAlert - Student Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>GuardianAlert</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="date-time">
+        <i class="far fa-clock"></i>
+        <span id="current-time">--:-- --</span>
+        <span id="current-date">--/--/----</span>
+      </div>
+      <div class="theme-toggle">
+        <label class="switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="slider round">
+            <i class="fas fa-sun"></i>
+            <i class="fas fa-moon"></i>
+          </span>
+        </label>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="user-profile">
+      <h3 id="display-name">User Name</h3>
+      <p id="user-role">Student</p>
+    </div>
+
+    <div class="sidebar-menu">
+      <div class="menu-section">
+        <h4><i class="fas fa-user-cog"></i> Account Settings</h4>
+        <button class="menu-btn" onclick="openSettings('name')">
+          <i class="fas fa-user-edit"></i> Edit Name
+        </button>
+        <button class="menu-btn" onclick="openSettings('lrn')">
+          <i class="fas fa-id-card"></i> Update LRN
+        </button>
+        <button class="menu-btn" onclick="openSettings('strand')">
+          <i class="fas fa-graduation-cap"></i> Edit Strand/Section
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-qrcode"></i> Quick Actions</h4>
+        <button class="menu-btn" onclick="sendMessageNow()">
+          <i class="fas fa-paper-plane"></i> Send Message Now
+        </button>
+        <button class="menu-btn" onclick="saveMessageTemplate()">
+          <i class="fas fa-save"></i> Save Message
+        </button>
+        <button class="menu-btn" onclick="viewActivityHistory()">
+          <i class="fas fa-history"></i> View Activity History
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-clinic-medical"></i> Clinic Access</h4>
+        <button class="menu-btn" onclick="window.location.href='clinic-dashboard.html'">
+          <i class="fas fa-hospital"></i> Clinic Dashboard
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="dashboard-grid">
+      <div class="dashboard-card intro-card">
+        <div class="card-header">
+          <i class="fas fa-hand-wave"></i>
+          <h3>Welcome, <span id="welcome-name">Student</span>!</h3>
+        </div>
+        <div class="card-body">
+          <p class="welcome-text">
+            Your safety is our priority. This dashboard helps you manage emergency alerts and stay connected with your parents/guardians.
+          </p>
+          <div class="quick-stats">
+            <div class="stat-item">
+              <i class="fas fa-qrcode"></i>
+              <span>QR Codes: <strong id="qr-count">2</strong></span>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-bell"></i>
+              <span>Alerts Sent: <strong id="alert-count">1</strong></span>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-calendar-check"></i>
+              <span>Last Login: <strong id="last-login">Today</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card qr-card scrollable-card">
+        <div class="card-header">
+          <i class="fas fa-qrcode"></i>
+          <h3>Emergency QR Code</h3>
+        </div>
+        <div class="card-body">
+          <div class="qr-container">
+            <div class="qr-display">
+              <img id="qrcode" src="https://via.placeholder.com/200" alt="QR Code" class="qr-image">
+            </div>
+            <select id="alert-type" class="qr-select" onchange="generateQR(this.value)">
+              <option value="sms">SMS Alert</option>
+              <option value="call">Phone Call</option>
+              <option value="email">Email Alert</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+            <p class="qr-instruction">
+              <i class="fas fa-info-circle"></i>
+              Scan this QR code to notify your parent via selected method
+            </p>
+            <div class="qr-actions">
+              <button class="btn-secondary" onclick="downloadQR()">
+                <i class="fas fa-download"></i> Download QR
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card profile-card scrollable-card">
+        <div class="card-header">
+          <i class="fas fa-user-circle"></i>
+          <h3>Personal Information</h3>
+          <button class="btn-icon-small" onclick="openSettings('name')" title="Edit Profile">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="profile-info">
+            <div class="info-item">
+              <i class="fas fa-user"></i>
+              <div>
+                <span class="label">Full Name:</span>
+                <span class="value" id="info-fullname">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-id-badge"></i>
+              <div>
+                <span class="label">LRN:</span>
+                <span class="value" id="info-lrn">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-graduation-cap"></i>
+              <div>
+                <span class="label">Strand/Section:</span>
+                <span class="value" id="info-strand">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-school"></i>
+              <div>
+                <span class="label">School Year:</span>
+                <span class="value" id="info-year">Loading...</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-chalkboard-teacher"></i>
+              <div>
+                <span class="label">Adviser:</span>
+                <span class="value" id="info-adviser">Ms. Reyes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card contact-card scrollable-card">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          <h3>Parent/Guardian</h3>
+          <button class="btn-icon-small" onclick="openSettings('parent')" title="Edit Contacts">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-user-friends"></i>
+              <div>
+                <span class="label">Name:</span>
+                <span class="value" id="parent-name">Maria Cruz</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-phone"></i>
+              <div>
+                <span class="label">Phone:</span>
+                <span class="value" id="parent-phone">+639123456789</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <span class="label">Email:</span>
+                <span class="value" id="parent-email">parent@email.com</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-clock"></i>
+              <div>
+                <span class="label">Last Contact:</span>
+                <span class="value" id="last-contact">Never</span>
+              </div>
+            </div>
+          </div>
+          <div class="contact-actions">
+            <button class="btn-secondary" onclick="testContact('call')">
+              <i class="fas fa-phone"></i> Test Call
+            </button>
+            <button class="btn-secondary" onclick="testContact('sms')">
+              <i class="fas fa-sms"></i> Test SMS
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card clinic-card scrollable-card">
+        <div class="card-header">
+          <i class="fas fa-stethoscope"></i>
+          <h3>Clinic Notifier</h3>
+        </div>
+        <div class="card-body">
+          <div class="clinic-status">
+            <div class="status-indicator" id="clinic-status">
+              <i class="fas fa-check-circle"></i>
+              <span>Clinic Available</span>
+            </div>
+            <p class="clinic-description">
+              Send emergency alerts to the school clinic directly.
+            </p>
+          </div>
+          <div class="clinic-actions">
+            <select id="clinic-alert-type" class="clinic-select">
+              <option value="">Select Alert Type</option>
+              <option value="injury">Injury</option>
+              <option value="illness">Illness</option>
+              <option value="fever">Fever</option>
+              <option value="emergency">Emergency</option>
+            </select>
+            <textarea id="clinic-message" placeholder="Brief description of issue..." rows="2"></textarea>
+            <button class="btn-primary clinic-btn" onclick="sendToClinic()">
+              <i class="fas fa-first-aid"></i> Notify Clinic
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card activity-card scrollable-card">
+        <div class="card-header">
+          <i class="fas fa-history"></i>
+          <h3>Recent Activity</h3>
+        </div>
+        <div class="card-body">
+          <div id="activity-list">
+            <div class="activity-item">
+              <i class="fas fa-spinner fa-spin"></i>
+              <div>
+                <span>Loading activities...</span>
+                <div>Please wait</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-secondary view-history-btn" onclick="viewActivityHistory()">
+            <i class="fas fa-list"></i> View Full History
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <input type="file" id="file-input" accept="image/*" style="display:none;">
+
+  <div class="modal" id="activity-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-history"></i> Activity History</h3>
+        <button class="modal-close" onclick="closeActivityModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="full-activity-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeActivityModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
