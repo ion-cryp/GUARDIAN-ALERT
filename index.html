@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GuardianAlert - Login / Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #333333 !important;
+      z-index: 10;
+      font-size: 1.1rem;
+      background: transparent;
+      padding: 5px;
+    }
+    .input-group {
+      position: relative;
+    }
+    .input-group input[type="password"],
+    .input-group input[type="text"] {
+      padding-right: 45px !important;
+      width: 100%;
+    }
+    .dark-mode .password-toggle {
+      color: #ffffff !important;
+    }
+    .input-group i:first-child {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--lavender);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="left-section">
+      <div class="logo-container">
+        <i class="fas fa-shield-alt logo-icon"></i>
+        <h1 class="logo-text">Guardian<span>Alert</span></h1>
+        <p class="tagline">Secure connections for students and parents</p>
+      </div>
+      
+      <div class="features-section">
+        <h2><i class="fas fa-star"></i> Key Features</h2>
+        <div class="features-grid">
+          <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-qrcode"></i></div>
+            <div class="feature-content">
+              <h3>Quick QR Alerts</h3>
+              <p>Generate instant emergency QR codes for immediate parent notification.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-stethoscope"></i></div>
+            <div class="feature-content">
+              <h3>Clinic Integration</h3>
+              <p>Direct communication with school clinic for medical emergencies.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-bell"></i></div>
+            <div class="feature-content">
+              <h3>Real-time Alerts</h3>
+              <p>Send instant alerts via SMS, call, or email.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-history"></i></div>
+            <div class="feature-content">
+              <h3>Activity Tracking</h3>
+              <p>Monitor all sent alerts with detailed history logs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-section">
+      <div class="auth-section">
+        <div class="access-header">
+          <h3><i class="fas fa-user-graduate"></i> Student Access</h3>
+          <div class="access-toggles">
+            <button type="button" class="access-toggle-btn active" id="student-login-toggle" onclick="showStudentLogin()">Login</button>
+            <button type="button" class="access-toggle-btn" id="student-signup-toggle" onclick="showStudentSignup()">Sign Up</button>
+          </div>
+        </div>
+        
+        <form id="student-login-form" class="auth-form active-form" onsubmit="return false;">
+          <div class="input-group">
+            <i class="fas fa-id-badge"></i>
+            <input type="text" id="student-lrn" placeholder="LRN (10-12 digits)" maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="student-password" placeholder="Password" required>
+            <i class="fas fa-eye password-toggle" id="toggleLoginPassword" onclick="togglePassword('student-password', 'toggleLoginPassword')"></i>
+          </div>
+          <button type="submit" class="btn-primary" onclick="loginUser(event)">
+            <i class="fas fa-arrow-right"></i> Student Login
+          </button>
+          <p id="login-error" class="error-msg"></p>
+        </form>
+
+        <form id="student-signup-form" class="auth-form" style="display: none;" onsubmit="return false;">
+          <div class="name-group">
+            <div class="input-group">
+              <i class="fas fa-user"></i>
+              <input type="text" id="new-firstname" placeholder="First Name" required>
+            </div>
+            <div class="input-group">
+              <i class="fas fa-user"></i>
+              <input type="text" id="new-middlename" placeholder="Middle Name">
+            </div>
+            <div class="input-group">
+              <i class="fas fa-user"></i>
+              <input type="text" id="new-lastname" placeholder="Last Name" required>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-id-badge"></i>
+            <input type="text" id="new-lrn" placeholder="LRN (10-12 digits)" maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-graduation-cap"></i>
+            <select id="school-year" required>
+              <option value="" disabled selected>Select Grade Level</option>
+              <option value="Grade 7">Grade 7</option>
+              <option value="Grade 8">Grade 8</option>
+              <option value="Grade 9">Grade 9</option>
+              <option value="Grade 10">Grade 10</option>
+              <option value="Senior High">Senior High</option>
+            </select>
+          </div>
+          
+          <div class="input-group" id="strand-group" style="display: none;">
+            <i class="fas fa-code-branch"></i>
+            <select id="strand">
+              <option value="" disabled selected>Select Strand</option>
+              <option value="TVL HE">TVL HE</option>
+              <option value="TVL Care Giving">TVL Care Giving</option>
+              <option value="TVL ICT">TVL ICT</option>
+              <option value="STEM">STEM</option>
+              <option value="HUMSS">HUMSS</option>
+              <option value="ABM">ABM</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <input type="text" id="new-adviser" placeholder="Adviser's Full Name" required>
+          </div>
+          
+          <div class="info-box">
+            <h4><i class="fas fa-users"></i> Guardian Information</h4>
+            <div class="input-group">
+              <i class="fas fa-user-tie"></i>
+              <input type="text" id="new-guardian-name" placeholder="Guardian's Full Name" required>
+            </div>
+            <div class="phone-group">
+              <div class="country-code">
+                <i class="fas fa-flag"></i>
+                <select id="parent-country-code">
+                  <option value="+63">+63 (Philippines)</option>
+                </select>
+              </div>
+              <div class="phone-input">
+                <i class="fas fa-mobile-alt"></i>
+                <input type="tel" id="new-parentphone" placeholder="Phone Number" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" required>
+              </div>
+            </div>
+            <div class="input-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="new-parentemail" placeholder="Guardian's Email" required>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="new-password" placeholder="Create Password (min. 6 characters)" minlength="6" required>
+            <i class="fas fa-eye password-toggle" id="toggleSignupPassword" onclick="togglePassword('new-password', 'toggleSignupPassword')"></i>
+          </div>
+          
+          <button type="submit" class="btn-primary" onclick="signupUser(event)">
+            <i class="fas fa-user-plus"></i> Create Account
+          </button>
+          <p id="signup-msg" class="info-msg"></p>
+          <p class="info-note">Demo account: LRN: 1234567890 / Password: password</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>

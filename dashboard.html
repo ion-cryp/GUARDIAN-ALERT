@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GuardianAlert - Student Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    #notification {
+      animation: slideIn 0.3s ease;
+    }
+    .clinic-phone {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(170, 170, 255, 0.1);
+      border-radius: 10px;
+      margin: 10px 0;
+      font-size: 0.9rem;
+      border: 1px dashed var(--lavender);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .clinic-phone:hover {
+      background: rgba(170, 170, 255, 0.2);
+      border-color: var(--deep-purple);
+    }
+    .clinic-phone i {
+      color: var(--lavender);
+      font-size: 1rem;
+    }
+    .clinic-phone .phone-label {
+      color: var(--font-purple);
+      font-weight: 600;
+    }
+    .dark-mode .clinic-phone .phone-label {
+      color: var(--text-primary);
+    }
+    .clinic-phone .phone-number {
+      font-weight: 600;
+      color: var(--deep-purple);
+    }
+    .dark-mode .clinic-phone .phone-number {
+      color: var(--soft-lavender);
+    }
+    .clinic-phone .edit-hint {
+      color: var(--gray);
+      font-size: 0.7rem;
+      margin-left: auto;
+      opacity: 0.7;
+    }
+    .clinic-phone:hover .edit-hint {
+      opacity: 1;
+    }
+    .phone-edit-modal .input-group {
+      margin-bottom: 20px;
+    }
+    .phone-edit-modal .input-group input {
+      padding: 12px 15px;
+      font-size: 1rem;
+    }
+    .phone-edit-modal .note {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>GuardianAlert</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="date-time">
+        <i class="far fa-clock"></i>
+        <span id="current-time">--:-- --</span>
+        <span id="current-date">--/--/----</span>
+      </div>
+      <div class="theme-toggle">
+        <label class="switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="slider round">
+            <i class="fas fa-sun"></i>
+            <i class="fas fa-moon"></i>
+          </span>
+        </label>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="user-profile">
+      <h3 id="display-name">User Name</h3>
+      <p>Student</p>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-section">
+        <h4><i class="fas fa-user-cog"></i> Account Settings</h4>
+        <button class="menu-btn" onclick="openEditModal('name')">
+          <i class="fas fa-user-edit"></i> Edit Name
+        </button>
+        <button class="menu-btn" onclick="openEditModal('lrn')">
+          <i class="fas fa-id-card"></i> Update LRN
+        </button>
+        <button class="menu-btn" onclick="openEditModal('year')">
+          <i class="fas fa-graduation-cap"></i> Edit Year Level
+        </button>
+        <button class="menu-btn" onclick="openEditModal('strand')">
+          <i class="fas fa-code-branch"></i> Edit Strand
+        </button>
+        <button class="menu-btn" onclick="openEditModal('adviser')">
+          <i class="fas fa-chalkboard-teacher"></i> Edit Adviser
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-users"></i> Guardian Settings</h4>
+        <button class="menu-btn" onclick="openEditModal('guardian-name')">
+          <i class="fas fa-user-tie"></i> Edit Guardian Name
+        </button>
+        <button class="menu-btn" onclick="openEditModal('guardian-phone')">
+          <i class="fas fa-phone"></i> Edit Phone Number
+        </button>
+        <button class="menu-btn" onclick="openEditModal('guardian-email')">
+          <i class="fas fa-envelope"></i> Edit Email
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-qrcode"></i> Quick Actions</h4>
+        <button class="menu-btn" onclick="sendEmergencyMessage()">
+          <i class="fas fa-paper-plane"></i> Send Emergency Message
+        </button>
+        <button class="menu-btn" onclick="downloadQR()">
+          <i class="fas fa-download"></i> Download QR Code
+        </button>
+        <button class="menu-btn" onclick="viewActivityHistory()">
+          <i class="fas fa-history"></i> View Activity History
+        </button>
+        <button class="menu-btn" onclick="clearActivityHistory()">
+          <i class="fas fa-trash-alt"></i> Clear History
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-clinic-medical"></i> Clinic Access</h4>
+        <button class="menu-btn" onclick="window.location.href='clinic-dashboard.html'">
+          <i class="fas fa-hospital"></i> Clinic Dashboard
+        </button>
+      </div>
+
+      <div class="menu-section">
+        <h4><i class="fas fa-tools"></i> Developer Tools</h4>
+        <button class="menu-btn" onclick="resetAllData()" style="color: #dc2626;">
+          <i class="fas fa-trash-alt"></i> Reset All Data
+        </button>
+        <button class="menu-btn" onclick="exportData()">
+          <i class="fas fa-download"></i> Export My Data
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="dashboard-grid">
+      <div class="dashboard-card intro-card">
+        <div class="card-header">
+          <i class="fas fa-hand-wave"></i>
+          <h3>Welcome back, <span id="welcome-name">Student</span>!</h3>
+          <button class="btn-icon-small" onclick="openEditModal('name')" title="Edit Name">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <p class="welcome-text">Your safety is our priority. Use this dashboard to manage emergency alerts, contact your guardian, and communicate with the school clinic.</p>
+          <div class="quick-stats">
+            <div class="stat-item">
+              <i class="fas fa-bell"></i>
+              <span>Alerts Sent: <strong id="alert-count">0</strong></span>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-calendar-check"></i>
+              <span>Last Login: <strong id="last-login">Today</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card qr-card">
+        <div class="card-header">
+          <i class="fas fa-qrcode"></i>
+          <h3>Emergency QR Code</h3>
+          <button class="btn-icon-small" onclick="downloadQR()" title="Download QR">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="qr-container">
+            <div class="qr-display">
+              <img id="qrcode" src="https://via.placeholder.com/200" alt="QR Code" class="qr-image">
+            </div>
+            <select id="alert-type" class="qr-select" onchange="generateQR(this.value)">
+              <option value="sms">SMS Alert</option>
+              <option value="call">Phone Call</option>
+              <option value="email">Email Alert</option>
+            </select>
+            <p class="qr-instruction">
+              <i class="fas fa-info-circle"></i>
+              Scan this QR code to instantly notify your parent
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card profile-card">
+        <div class="card-header">
+          <i class="fas fa-user-circle"></i>
+          <h3>Your Information</h3>
+        </div>
+        <div class="card-body">
+          <div class="profile-info">
+            <div class="info-item" onclick="openEditModal('name')" style="cursor: pointer;">
+              <i class="fas fa-user"></i>
+              <div>
+                <span class="label">Full Name:</span>
+                <span class="value" id="info-fullname">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="info-item" onclick="openEditModal('lrn')" style="cursor: pointer;">
+              <i class="fas fa-id-badge"></i>
+              <div>
+                <span class="label">LRN:</span>
+                <span class="value" id="info-lrn">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="info-item" onclick="openEditModal('year')" style="cursor: pointer;">
+              <i class="fas fa-graduation-cap"></i>
+              <div>
+                <span class="label">Year Level:</span>
+                <span class="value" id="info-year">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="info-item" onclick="openEditModal('strand')" style="cursor: pointer;">
+              <i class="fas fa-code-branch"></i>
+              <div>
+                <span class="label">Strand/Track:</span>
+                <span class="value" id="info-strand">Not Applicable</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="info-item" onclick="openEditModal('adviser')" style="cursor: pointer;">
+              <i class="fas fa-chalkboard-teacher"></i>
+              <div>
+                <span class="label">Adviser:</span>
+                <span class="value" id="info-adviser">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card contact-card">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          <h3>Parent/Guardian</h3>
+        </div>
+        <div class="card-body">
+          <div class="contact-info">
+            <div class="contact-item" onclick="openEditModal('guardian-name')" style="cursor: pointer;">
+              <i class="fas fa-user-friends"></i>
+              <div>
+                <span class="label">Name:</span>
+                <span class="value" id="parent-name">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="contact-item" onclick="openEditModal('guardian-phone')" style="cursor: pointer;">
+              <i class="fas fa-phone"></i>
+              <div>
+                <span class="label">Phone:</span>
+                <span class="value" id="parent-phone">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+            <div class="contact-item" onclick="openEditModal('guardian-email')" style="cursor: pointer;">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <span class="label">Email:</span>
+                <span class="value" id="parent-email">Loading...</span>
+              </div>
+              <i class="fas fa-pen edit-icon" style="margin-left: auto;"></i>
+            </div>
+          </div>
+          <div class="contact-actions">
+            <button class="btn-secondary" onclick="testContact('call')">
+              <i class="fas fa-phone"></i> Test Call
+            </button>
+            <button class="btn-secondary" onclick="testContact('sms')">
+              <i class="fas fa-sms"></i> Test SMS
+            </button>
+            <button class="btn-secondary" onclick="testContact('email')">
+              <i class="fas fa-envelope"></i> Test Email
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card clinic-card">
+        <div class="card-header">
+          <i class="fas fa-stethoscope"></i>
+          <h3>Clinic Notifier</h3>
+          <button class="btn-icon-small" onclick="openClinicPhoneModal()" title="Edit Clinic Phone">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="clinic-status">
+            <div class="status-indicator" id="clinic-status">
+              <i class="fas fa-check-circle"></i>
+              <span>Clinic Available</span>
+            </div>
+          </div>
+          <div class="clinic-actions">
+            <select id="clinic-alert-type" class="clinic-select">
+              <option value="">Select Alert Type</option>
+              <option value="injury">🤕 Injury</option>
+              <option value="illness">🤒 Illness</option>
+              <option value="fever">🌡️ Fever</option>
+              <option value="emergency">🚨 Emergency</option>
+            </select>
+            <textarea id="clinic-message" placeholder="Describe your situation..." rows="3"></textarea>
+            
+            <!-- Editable Clinic Phone Number Display -->
+            <div class="clinic-phone" onclick="openClinicPhoneModal()" title="Click to edit clinic phone number">
+              <i class="fas fa-phone-alt"></i>
+              <span class="phone-label">School Clinic:</span>
+              <span class="phone-number" id="clinic-phone-display">+63 912 345 6789</span>
+              <span class="edit-hint"><i class="fas fa-pen"></i> Edit</span>
+            </div>
+            
+            <div class="action-buttons">
+              <button class="btn-primary" onclick="sendToClinic('call')" style="flex: 1;">
+                <i class="fas fa-phone"></i> Call Clinic
+              </button>
+              <button class="btn-primary" onclick="sendToClinic('sms')" style="flex: 1;">
+                <i class="fas fa-sms"></i> SMS Clinic
+              </button>
+            </div>
+            <button class="btn-secondary" onclick="clearClinicForm()">
+              <i class="fas fa-times"></i> Clear Form
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card activity-card">
+        <div class="card-header">
+          <i class="fas fa-history"></i>
+          <h3>Recent Activity</h3>
+          <button class="btn-icon-small" onclick="clearActivityHistory()" title="Clear History">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="activity-list"></div>
+          <div class="action-buttons" style="margin-top: 12px;">
+            <button class="btn-secondary" onclick="viewActivityHistory()">
+              <i class="fas fa-list"></i> View Full History
+            </button>
+            <button class="btn-secondary" onclick="exportActivityHistory()">
+              <i class="fas fa-download"></i> Export
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="edit-modal-title"><i class="fas fa-edit"></i> Edit Information</h3>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="edit-form-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeEditModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn-primary" onclick="saveEdit()">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clinic Phone Edit Modal -->
+  <div class="modal" id="clinic-phone-modal">
+    <div class="modal-content phone-edit-modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-phone-alt"></i> Edit Clinic Phone Number</h3>
+        <button class="modal-close" onclick="closeClinicPhoneModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <i class="fas fa-phone"></i>
+          <input type="tel" id="edit-clinic-phone" placeholder="Enter clinic phone number" value="" maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+        <p class="note">Enter phone number without country code (e.g., 9123456789)</p>
+        <p class="note">Format: 10-12 digits</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeClinicPhoneModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn-primary" onclick="saveClinicPhone()">
+          <i class="fas fa-save"></i> Save Number
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Modal -->
+  <div class="modal" id="activity-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-history"></i> Activity History</h3>
+        <button class="modal-close" onclick="closeActivityModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="full-activity-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="exportActivityHistory()">
+          <i class="fas fa-download"></i> Export
+        </button>
+        <button class="btn-secondary" onclick="clearActivityHistory()">
+          <i class="fas fa-trash"></i> Clear
+        </button>
+        <button class="btn-secondary" onclick="closeActivityModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
